@@ -13,21 +13,20 @@ exports.GetAllRestaurant = function () {
             }
         });
     }
-
     setTimeout(function() {
         fs.writeFile('michelin.json', JSON.stringify(info), 'utf8');
         console.log('File created !');
     }, 10000);
 };
 
-exports.GetData = function () {
+
+exports.GetData = function (attribute, callback) {
     fs.readFile('michelin.json', 'utf8', function (err, data) {
         if (err) throw err;
-        //console.log(JSON.parse(data)[0])
+        var res = [];
         for(var attributename in JSON.parse(data)){
-            console.log(attributename+": "+JSON.parse(data)[attributename]["title"]);
+            res.push(JSON.parse(data)[attributename][attribute]);
         }
-        return JSON.parse(data);
+        callback(res);
     });
-
 };
