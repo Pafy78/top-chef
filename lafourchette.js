@@ -26,21 +26,27 @@ exports.GetRestaurantByTitle = function (detail, callback) {
 
 
 var GetSpecificPromo = function(url, callback){
-    var url = 'https://m.lafourchette.com/api/restaurant/' + url.split("/")[3] + "/sale-type";
+    var offer = false;
     var configuration = {
-        'uri': url,
+        'uri': 'https://m.lafourchette.com/api/restaurant/' + url.split("/")[3] + "/sale-type",
         'headers': {
             'cookie': 'datadome=AHrlqAAAAAMAF4a7sY37iSUAVvJqHA=='
         }
     };
     request(configuration, function (error, response, body) {
+        if(body == undefined){
+            console.log('https://m.lafourchette.com/api/restaurant/' + url.split("/")[3] + "/sale-type");
+            GetSpecificPromo(url, function(url2, offer2){
+                callback(url2, offer2);
+            });
+        }
         if (!error && response.statusCode == 200) {
             for(var i = 0; i < JSON.parse(body).length; i++){
                 var menu = JSON.parse(body)[i];
-                if(menu["is_special_offer"] == true){
-                    callback(url);
-                }
+                if(menu["is_special_offer"])
+                    offer = true;
             }
+            callback(url, offer);
         }
     });
 }
@@ -51,12 +57,15 @@ exports.GetPromotion = function(callback){
         console.log("0/" +   JSON.parse(data).length);
         if (err) throw err;
         var count = 0;
+        var end = false;
         for(var attributename in JSON.parse(data)){
-            GetSpecificPromo(JSON.parse(data)[attributename].fourchette_url, function(resultat){
+            GetSpecificPromo(JSON.parse(data)[attributename].fourchette_url, function(url, offer){
                 count++;
                 console.log('\033[2J');
                 console.log(count + "/" + JSON.parse(data).length);
-                callback(resultat);
+                if(count == JSON.parse(data).length)
+                    end = true;
+                callback("https://www.lafourchette.com" + url, offer, end);
             });
 
         }
