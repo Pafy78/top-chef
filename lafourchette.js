@@ -24,6 +24,27 @@ exports.GetRestaurantByTitle = function (detail, callback) {
     });
 };
 
+
+var GetSpecificPromo = function(url, callback){
+    var url = 'https://m.lafourchette.com/api/restaurant/' + url.split("/")[3] + "/sale-type";
+    var configuration = {
+        'uri': url,
+        'headers': {
+            'cookie': 'datadome=AHrlqAAAAAMAF4a7sY37iSUAVvJqHA=='
+        }
+    };
+    request(configuration, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            for(var i = 0; i < JSON.parse(body).length; i++){
+                var menu = JSON.parse(body)[i];
+                if(menu["is_special_offer"] == true){
+                    callback(url);
+                }
+            }
+        }
+    });
+}
+
 exports.GetPromotion = function(callback){
     fs.readFile('lafourchette_details.json', 'utf8', function (err, data) {
         console.log('\033[2J');
@@ -31,39 +52,13 @@ exports.GetPromotion = function(callback){
         if (err) throw err;
         var count = 0;
         for(var attributename in JSON.parse(data)){
-            //var url = 'https://www.lafourchette.com/reservation/module/date-list/' + JSON.parse(data)[attributename].fourchette_url.split("/")[3];
-            var url = 'https://www.lafourchette.com' + JSON.parse(data)[attributename].fourchette_url;
-            var configuration = {
-                'uri': url,
-                'headers': {
-                    'cookie': 'datadome=AHrlqAAAAAMAF4a7sY37iSUAVvJqHA=='
-                }
-            };
-            request(configuration, function (error, response, body) {
-                /*console.log(body.substring(174,206));
-                configuration = {
-                    'uri': url,
-                    'headers': {
-                        'cookie': 'datadome=' + body.substring(174,206)
-                    }
-                };*/
-                if (!error && response.statusCode == 200) {
-                    count++;
-                    console.log('\033[2J');
-                    console.log(count + "/" +   JSON.parse(data).length);
-                    var $ = cheerio.load(body);
-                    $('.moduleSaleType').filter(function(){
-                        console.log("Restaurant found !");
-                        if(count == JSON.parse(data).length){
-                            callback(JSON.parse(data)[attributename].fourchette_url, true);
-                        }
-                        else{
-                            callback(JSON.parse(data)[attributename].fourchette_url);
-                        }
-
-                    });
-                }
+            GetSpecificPromo(JSON.parse(data)[attributename].fourchette_url, function(resultat){
+                count++;
+                console.log('\033[2J');
+                console.log(count + "/" + JSON.parse(data).length);
+                callback(resultat);
             });
+
         }
     });  
 };

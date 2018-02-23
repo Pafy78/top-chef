@@ -69,7 +69,7 @@ function GetLafourchetteURL(){
 http.createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
     lafourchette.GetPromotion(function(url, end = false){
-        res.write(url);
+        res.write("<a href='" + url + "'</a>");
         res.write("<br/>");
         if(end){
             res.end();
