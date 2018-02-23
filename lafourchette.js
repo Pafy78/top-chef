@@ -30,35 +30,23 @@ exports.GetPromotion = function(callback){
         if (err) throw err;
         var count = 0;
         for(var attributename in JSON.parse(data)){
-            /*request({
-                headers: {
-                    'Content-Length': 0,
-                    'Content-Type': 'text/html',
-                    'User-Agent': 'request'
-                },
-                uri: 'https://www.lafourchette.com' + JSON.parse(data)[attributename].fourchette_url,
-                method: 'GET'
-            }, function (error, response, body) {
-                console.log(body);
+            request('https://www.lafourchette.com' + JSON.parse(data)[attributename].fourchette_url, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
+                    count++;
+                    console.log(count + "/" +   JSON.parse(data).length);
                     var $ = cheerio.load(body);
                     $('.moduleSaleType').filter(function(){
                         console.log("Find restaurant !");
-                        callback(JSON.parse(data)[attributename].fourchette_url);
+                        if(count == JSON.parse(data).length){
+                            callback(JSON.parse(data)[attributename].fourchette_url, true);
+                        }
+                        else{
+                            callback(JSON.parse(data)[attributename].fourchette_url);
+                        }
+
                     });
-                    count++;
-                    console.log(count + "/" +   JSON.parse(data).length);
                 }
-            });*/
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://www.lafourchette.com' + JSON.parse(data)[attributename].fourchette_url, true);
-            xhr.send();
-
-            xhr.onreadystatechange = processRequest;
-
-            function processRequest(e) {
-                console.log(xhr.responseText);
-            }
+            });
         }
     });  
 };
