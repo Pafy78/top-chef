@@ -67,11 +67,16 @@ function GetLafourchetteURL(){
 //GetLafourchetteURL();
 
 http.createServer(function (req, res) {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    lafourchette.GetPromotion(function(url, offer, end){
+    //res.writeHead(200, {'Content-Type': 'text/html'});
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    lafourchette.GetPromotion(function(restaurant, offer, menu, end){
         if(offer){
-            res.write("<a href='" + url + "'>" + url + "</a>");
+            res.write(restaurant.title + " : " + menu["title"]);
             res.write("<br/>");
+            res.write(restaurant.locality + " (" + restaurant.postalcode + ")");
+            res.write("<br/>");
+            res.write("<a target='_blank' href='https://www.lafourchette.com" + restaurant.fourchette_url + "'>https://www.lafourchette.com" + restaurant.fourchette_url + "</a>");
+            res.write("<br/><br/>");
         }
         if(end){
             res.end();

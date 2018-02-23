@@ -25,19 +25,18 @@ exports.GetRestaurantByTitle = function (detail, callback) {
 };
 
 
-var GetSpecificPromo = function(url, callback){
+var GetSpecificPromo = function(restaurant, callback){
     var offer = false;
     var configuration = {
-        'uri': 'https://m.lafourchette.com/api/restaurant/' + url.split("/")[3] + "/sale-type",
+        'uri': 'https://m.lafourchette.com/api/restaurant/' + restaurant.fourchette_url.split("/")[3] + "/sale-type",
         'headers': {
             'cookie': 'datadome=AHrlqAAAAAMAF4a7sY37iSUAVvJqHA=='
         }
     };
     request(configuration, function (error, response, body) {
         if(body == undefined){
-            console.log('https://m.lafourchette.com/api/restaurant/' + url.split("/")[3] + "/sale-type");
-            GetSpecificPromo(url, function(url2, offer2){
-                callback(url2, offer2);
+            GetSpecificPromo(restaurant, function(restaurant2, offer2, menu2){
+                callback(restaurant2, offer2, menu2);
             });
         }
         if (!error && response.statusCode == 200) {
@@ -46,26 +45,22 @@ var GetSpecificPromo = function(url, callback){
                 if(menu["is_special_offer"])
                     offer = true;
             }
-            callback(url, offer);
+            callback(restaurant, offer, JSON.parse(body)[0]);
         }
     });
 }
 
 exports.GetPromotion = function(callback){
     fs.readFile('lafourchette_details.json', 'utf8', function (err, data) {
-        console.log('\033[2J');
-        console.log("0/" +   JSON.parse(data).length);
         if (err) throw err;
         var count = 0;
         var end = false;
         for(var attributename in JSON.parse(data)){
-            GetSpecificPromo(JSON.parse(data)[attributename].fourchette_url, function(url, offer){
+            GetSpecificPromo(JSON.parse(data)[attributename], function(restaurant, offer, menu){
                 count++;
-                console.log('\033[2J');
-                console.log(count + "/" + JSON.parse(data).length);
                 if(count == JSON.parse(data).length)
                     end = true;
-                callback("https://www.lafourchette.com" + url, offer, end);
+                callback(restaurant, offer, menu, end);
             });
 
         }
