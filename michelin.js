@@ -1,24 +1,30 @@
 var request = require('request');
 var fs = require('fs');
-var info = [];
+var cheerio = require('cheerio');
 
-exports.GetAllRestaurant = function () {
-    for(i = 0; i < 34; i++){ // 34 pages
-        request('https://restaurant.michelin.fr/search-restaurants?localisation=1424&cooking_type=&gm_selection=1&stars=1%7C%7C3&bib_gourmand=&piecette=&michelin_plate=&services=&ambiance=&booking_activated=&min_price=&max_price=&number_of_offers=&prev_localisation=1424&latitude=&longitude=&bbox_ne_lat=&bbox_ne_lon=&bbox_sw_lat=&bbox_sw_lon=&page_number=' + i + '&op=Rechercher&js=true', function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var new_info = JSON.parse(body);
-                for(var x in new_info[1]["settings"]["search_result_markers"]){
-                    info.push(new_info[1]["settings"]["search_result_markers"][x]);
-                }
-            }
-        });
+
+exports.GetAllRestaurant = function (page, callback) {
+    var url = "https://restaurant.michelin.fr/restaurants/france/restaurants-1-etoile-michelin/restaurants-2-etoiles-michelin/restaurants-3-etoiles-michelin/";
+    if(page > 1){
+        page = "page-" + page;
     }
-    setTimeout(function() {
-        fs.writeFile('michelin.json', JSON.stringify(info), 'utf8');
-        console.log('File created !');
-    }, 10000);
-};
+    else{
+        page = "";
+    }
+    request(url + page, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var $ = cheerio.load(body);
+            $('.poi-card-link').filter(function(){
+                var data = $(this);
+                var detail = {
+                    content_url : "https://restaurant.michelin.fr" + data.first().attr()["href"]
+                }
+                callback(detail);
+            });
 
+        }
+    });
+};
 
 exports.GetData = function (attribute, callback) {
     fs.readFile('michelin.json', 'utf8', function (err, data) {
@@ -30,3 +36,55 @@ exports.GetData = function (attribute, callback) {
         callback(res);
     });
 };
+
+exports.GetRestaurantDetailFromLocal = function(callback){
+    fs.readFile('michelin_details.json', 'utf8', function (err, data) {
+        if (err) throw err;
+        var res = [];
+        for(var attributename in JSON.parse(data)){
+            res.push(JSON.parse(data)[attributename]);
+        }
+        callback(res);
+    });
+};
+
+exports.GetRestaurantDetail = function(url, callback){
+    var detail = {
+        title : "",
+        adress : "",
+        postalcode : "",
+        locality : "",
+        country : "",
+        content_url : ""
+    };
+    detail.content_url = url;
+    request(url, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var $ = cheerio.load(body);
+            $('.street-block').filter(function(){
+                var data = $(this);
+                detail.adress = data.children().first().text();
+            });
+            $('.poi_intro-display-title').filter(function(){
+                var data = $(this);
+                var title = data.first().text();
+                title = title.replace('\n      ','');
+                title = title.replace('    ','');
+                detail.title = title;
+            });
+            $('.postal-code').filter(function(){
+                var data = $(this);
+                detail.postalcode = data.first().text();
+            });
+            $('.locality').filter(function(){
+                var data = $(this);
+                detail.locality = data.first().text();
+            });
+            $('.country').filter(function(){
+                var data = $(this);
+                detail.country = data.first().text();
+            });
+            callback(detail);
+        }
+    });
+}
