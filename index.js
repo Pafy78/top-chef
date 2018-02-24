@@ -5,6 +5,11 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 
+const express = require('express');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
 
 function GetMichelin(){
     var details = [];
@@ -66,7 +71,22 @@ function GetLafourchetteURL(){
 }
 //GetLafourchetteURL();
 
-http.createServer(function (req, res) {
+
+app.get('/api/hello', (req, res) => {
+    lafourchette.GetPromotion(function(restaurant, offer, menu, end){
+        if(offer){
+            res.send(restaurant);
+        }
+        if(end){
+            //res.end();
+        }
+    });
+});
+
+
+app.listen(port, () => console.log(`Listening on port ${port}`));
+
+/*http.createServer(function (req, res) {
     //res.writeHead(200, {'Content-Type': 'text/html'});
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     lafourchette.GetPromotion(function(restaurant, offer, menu, end){
@@ -83,4 +103,4 @@ http.createServer(function (req, res) {
         }
     });
 
-}).listen(8888);
+}).listen(3000);*/

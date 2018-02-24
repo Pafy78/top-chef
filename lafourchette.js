@@ -34,7 +34,8 @@ var GetSpecificPromo = function(restaurant, callback){
         }
     };
     request(configuration, function (error, response, body) {
-        if(body == undefined){
+        if(body == undefined || error || response.statusCode != 200){
+            console.log(restaurant.fourchette_url);
             GetSpecificPromo(restaurant, function(restaurant2, offer2, menu2){
                 callback(restaurant2, offer2, menu2);
             });
@@ -56,13 +57,23 @@ exports.GetPromotion = function(callback){
         var count = 0;
         var end = false;
         for(var attributename in JSON.parse(data)){
-            GetSpecificPromo(JSON.parse(data)[attributename], function(restaurant, offer, menu){
+            var resto = JSON.parse(data)[attributename];
+            if(isInt(resto.fourchette_url.split("/")[3])){
+                GetSpecificPromo(resto, function(restaurant, offer, menu){
+                    count++;
+                    console.log(count + "/" + JSON.parse(data).length);
+                    if(count == JSON.parse(data).length)
+                        end = true;
+                    callback(restaurant, offer, menu, end);
+                });
+            }
+            else{
                 count++;
-                if(count == JSON.parse(data).length)
-                    end = true;
-                callback(restaurant, offer, menu, end);
-            });
-
+            }
         }
     });  
 };
+
+function isInt(n) {
+   return n % 1 === 0;
+}
