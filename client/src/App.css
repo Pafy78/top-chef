@@ -18,8 +18,31 @@
   font-size: 1.5em;
 }
 
-.App-intro {
-  font-size: large;
+
+a{
+  color: black;
+  text-decoration: none;
+}
+
+.restaurant-list{
+  display: flex;
+  flex-wrap: wrap;
+}
+.restaurant {
+  width: 100%;
+  height: 100%;
+  background-color: #222222;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.card{
+  width: 25%;
+  height: 200px;
+  padding: 20px 4%;
 }
 
 @keyframes App-logo-spin {
