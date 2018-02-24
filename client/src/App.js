@@ -23,28 +23,32 @@ class App extends Component {
 
   render() {
     if(this.state.response[0] !== undefined){
+      console.log(this.state.response[0]);
       return (
         <div className="App">
-          <header className="App-header">
-            <img src={logo} className="App-logo" alt="logo" />
-            <h1 className="App-title">Welcome to Top Chef dictionnary</h1>
-          </header>
-          <h1>List of restaurant with promotion :</h1>
-          <div className="restaurant-list">
-            {this.state.response.map((restaurant, index) => (
-              <div class="card">
-                <a target="_blank" href={"https://www.lafourchette.com" + restaurant.fourchette_url}>
-                  <div className="restaurant">
-                    <h2>{restaurant.title}</h2>
-                    <div>
-                      <p>{restaurant.adress}</p>
-                      <p>{restaurant.locality}, {restaurant.postalcode}</p>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            ))}
+        <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <h1 className="App-title">Welcome to Top Chef dictionnary</h1>
+        </header>
+        <h1>List of restaurant with promotion :</h1>
+        <div className="restaurant-list">
+        {this.state.response.sort(function(a,b){return parseInt(b.discount_amount)  - parseInt(a.discount_amount);}).map((restaurant, index) => (
+          <div className="card">
+          <a target="_blank" href={"https://www.lafourchette.com" + restaurant.fourchette_url}>
+          <div className="restaurant">
+          <div>
+          <h2>{restaurant.title}</h2>
+          <p className="little promo">{restaurant.promotion}</p>
           </div>
+          <div>
+          <p>{restaurant.adress}</p>
+          <p>{restaurant.locality}, {restaurant.postalcode}</p>
+          </div>
+          </div>
+          </a>
+          </div>
+        ))}
+        </div>
         </div>
       );
     }

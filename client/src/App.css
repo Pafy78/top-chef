@@ -23,10 +23,19 @@ a{
   color: black;
   text-decoration: none;
 }
+p{
+  margin:0px;
+  margin-bottom: 10px;
+}
+h2{
+  margin:0px;
+  margin-bottom: 15px;
+}
 
 .restaurant-list{
   display: flex;
   flex-wrap: wrap;
+  margin-bottom: 40px;
 }
 .restaurant {
   width: 100%;
@@ -36,13 +45,20 @@ a{
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   color: white;
+  padding: 10px;
 }
 .card{
   width: 25%;
   height: 200px;
   padding: 20px 4%;
+}
+p.little{
+  font-size: 12px;
+}
+p.promo{
+  color:red;
 }
 
 @keyframes App-logo-spin {
